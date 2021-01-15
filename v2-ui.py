@@ -83,6 +83,7 @@ if __name__ == '__main__':
             print('resetconfig: Reset all panel settings to default values')
             print('resetuser: Reset username and password to \'admin\'')
             print('setport [number]: Set web port to [number], default is 65432')
+        os._exit(0)
     else:
         init_windows()
         logging_init()
