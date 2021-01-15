@@ -583,6 +583,7 @@ class Inbound extends V2CommonClass {
         } else if (network === 'kcp') {
             let kcp = this.stream.kcp;
             type = kcp.type;
+            path = kcp.seed;
         } else if (network === 'ws') {
             let ws = this.stream.ws;
             path = ws.path;
@@ -624,6 +625,10 @@ class Inbound extends V2CommonClass {
 
     genSSLink(address='') {
         let settings = this.settings;
+        const server = this.stream.tls.server;
+        if (!isEmpty(server)) {
+            address = server;
+        }
         return 'ss://' + Inbound.safeBase64(settings.method + ':' + settings.password + '@' + address + ':' + this.port)
             + '#' + encodeURIComponent(this.remark);
     }
