@@ -170,17 +170,17 @@ WantedBy=multi-user.target
 }
 
 close_firewall() {
-    if [[ x"${release}" == x"centos" ]]; then
-        systemctl stop firewalld
-        systemctl disable firewalld
-    elif [[ x"${release}" == x"ubuntu" ]]; then
-        ufw disable
+#    if [[ x"${release}" == x"centos" ]]; then
+#        systemctl stop firewalld
+#        systemctl disable firewalld
+#    elif [[ x"${release}" == x"ubuntu" ]]; then
+#        ufw disable
 #    elif [[ x"${release}" == x"debian" ]]; then
 #        iptables -P INPUT ACCEPT
 #        iptables -P OUTPUT ACCEPT
 #        iptables -P FORWARD ACCEPT
 #        iptables -F
-    fi
+#    fi
 }
 
 install_v2-ui() {
