@@ -169,7 +169,7 @@ WantedBy=multi-user.target
     systemctl start v2ray
 }
 
-close_firewall() {
+#close_firewall() {
 #    if [[ x"${release}" == x"centos" ]]; then
 #        systemctl stop firewalld
 #        systemctl disable firewalld
@@ -181,7 +181,7 @@ close_firewall() {
 #        iptables -P FORWARD ACCEPT
 #        iptables -F
 #    fi
-}
+#}
 
 install_v2-ui() {
     systemctl stop v2-ui
@@ -250,5 +250,5 @@ install_v2-ui() {
 echo -e "${green}开始安装${plain}"
 install_base
 uninstall_old_v2ray
-close_firewall
+#close_firewall
 install_v2-ui $1
