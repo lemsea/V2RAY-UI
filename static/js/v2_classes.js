@@ -40,11 +40,17 @@ const RULE_DOMAIN = {
     SPEEDTEST: 'geosite:speedtest',
 };
 
+const VLESS_FLOW = {
+    ORIGIN: "xtls-rprx-origin",
+    DIRECT: "xtls-rprx-direct",
+};
+
 Object.freeze(Protocols);
 Object.freeze(VmessMethods);
 Object.freeze(SSMethods);
 Object.freeze(RULE_IP);
 Object.freeze(RULE_DOMAIN);
+Object.freeze(VLESS_FLOW);
 
 class V2CommonClass {
 
@@ -467,7 +473,13 @@ class StreamSettings extends V2CommonClass {
                 ) {
         super();
         this.network = network;
-        this.security = security;
+        if (security === "xtls") {
+            this.security = "tls";
+            this._is_xtls = true;
+        } else {
+            this.security = security;
+            this._is_xtls = false;
+        }
         this.tls = tlsSettings;
         this.tcp = tcpSettings;
         this.kcp = kcpSettings;
@@ -476,11 +488,25 @@ class StreamSettings extends V2CommonClass {
         this.quic = quicSettings;
     }
 
+    get is_xtls() {
+        return this.security === "tls" && this._is_xtls;
+    }
+
+    set is_xtls(is_xtls) {
+        this._is_xtls = is_xtls;
+    }
+
     static fromJson(json={}) {
+        let tls;
+        if (json.security === "xtls") {
+            tls = TlsStreamSettings.fromJson(json.xtlsSettings);
+        } else {
+            tls = TlsStreamSettings.fromJson(json.tlsSettings);
+        }
         return new StreamSettings(
             json.network,
             json.security,
-            TlsStreamSettings.fromJson(json.tlsSettings),
+            tls,
             TcpStreamSettings.fromJson(json.tcpSettings),
             KcpStreamSettings.fromJson(json.kcpSettings),
             WsStreamSettings.fromJson(json.wsSettings),
@@ -492,10 +518,14 @@ class StreamSettings extends V2CommonClass {
     toJson() {
         let network = this.network;
         let security = this.security;
+        if (this.is_xtls) {
+            security = "xtls";
+        }
         return {
             network: network,
             security: security,
-            tlsSettings: security === 'tls' && ['tcp', 'ws', 'http', 'quic'].indexOf(network) >= 0 ? this.tls.toJson() : undefined,
+            tlsSettings: this.security === 'tls' && ['tcp', 'ws', 'http', 'quic'].indexOf(network) >= 0 && !this.is_xtls ? this.tls.toJson() : undefined,
+            xtlsSettings: this.is_xtls ? this.tls.toJson() : undefined,
             tcpSettings: network === 'tcp' ? this.tcp.toJson() : undefined,
             kcpSettings: network === 'kcp' ? this.kcp.toJson() : undefined,
             wsSettings: network === 'ws' ? this.ws.toJson() : undefined,
@@ -867,6 +897,14 @@ Inbound.VLESSSettings = class extends Inbound.Settings {
         this.fallbacks = fallbacks;
     }
 
+    addFallback() {
+        this.fallbacks.push(new Inbound.VLESSSettings.Fallback());
+    }
+
+    delFallback(index) {
+        this.fallbacks.splice(index, 1);
+    }
+
     static fromJson(json={}) {
         return new Inbound.VLESSSettings(
             Protocols.VLESS,
@@ -886,20 +924,23 @@ Inbound.VLESSSettings = class extends Inbound.Settings {
 };
 Inbound.VLESSSettings.VLESS = class extends V2CommonClass {
 
-    constructor(id=randomUUID()) {
+    constructor(id=randomUUID(), flow=VLESS_FLOW.DIRECT) {
         super();
         this.id = id;
+        this.flow = flow;
     }
 
     static fromJson(json={}) {
-        return new Inbound.VmessSettings.Vmess(
+        return new Inbound.VLESSSettings.VLESS(
             json.id,
+            json.flow,
         );
     }
 };
 Inbound.VLESSSettings.Fallback = class extends V2CommonClass {
-    constructor(alpn='', path='', dest='', xver=0) {
+    constructor(name="", alpn='', path='', dest='', xver=0) {
         super();
+        this.name = name;
         this.alpn = alpn;
         this.path = path;
         this.dest = dest;
@@ -908,6 +949,7 @@ Inbound.VLESSSettings.Fallback = class extends V2CommonClass {
 
     toJson() {
         return {
+            name: this.name,
             alpn: this.alpn,
             path: this.path,
             dest: this.dest,
@@ -919,6 +961,7 @@ Inbound.VLESSSettings.Fallback = class extends V2CommonClass {
         const fallbacks = [];
         for (let fallback of json) {
             fallbacks.push(new Inbound.VLESSSettings.Fallback(
+                fallback.name,
                 fallback.alpn,
                 fallback.path,
                 fallback.dest,
