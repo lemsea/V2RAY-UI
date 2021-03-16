@@ -96,9 +96,9 @@ uninstall_old_v2ray() {
         systemctl daemon-reload
     fi
     if [[ -f /usr/local/bin/v2ray ]]; then
-        confirm "检测到其它方式安装的 v2ray，是否卸载，v2-ui 自带官方 v2ray 内核，为防止与其端口冲突，建议卸载" "Y"
+        confirm "检测到其它方式安装的 v2ray，是否卸载，v2-ui 自带官方 xray 内核，为防止与其端口冲突，建议卸载" "Y"
         if [[ $? != 0 ]]; then
-            echo -e "${red}你选择了不卸载，请自行确保其它脚本安装的 v2ray 与 v2-ui ${green}自带的官方 v2ray 内核${red}不会端口冲突${plain}"
+            echo -e "${red}你选择了不卸载，请自行确保其它脚本安装的 v2ray 与 v2-ui ${green}自带的官方 xray 内核${red}不会端口冲突${plain}"
         else
             echo -e "${green}开始卸载其它方式安装的 v2ray${plain}"
             systemctl stop v2ray

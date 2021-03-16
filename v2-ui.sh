@@ -76,7 +76,7 @@ confirm() {
 }
 
 confirm_restart() {
-    confirm "是否重启面板，重启面板也会重启 v2ray" "y"
+    confirm "是否重启面板，重启面板也会重启 xray" "y"
     if [[ $? == 0 ]]; then
         restart
     else
@@ -122,7 +122,7 @@ update() {
 }
 
 uninstall() {
-    confirm "确定要卸载面板吗，v2ray 也会卸载?" "n"
+    confirm "确定要卸载面板吗，xray 也会卸载?" "n"
     if [[ $? != 0 ]]; then
         if [[ $# == 0 ]]; then
             show_menu
@@ -218,7 +218,7 @@ stop() {
         sleep 2
         check_status
         if [[ $? == 1 ]]; then
-            echo -e "${green}v2-ui 与 v2ray 停止成功${plain}"
+            echo -e "${green}v2-ui 与 xray 停止成功${plain}"
         else
             echo -e "${red}面板停止失败，可能是因为停止时间超过了两秒，请稍后查看日志信息${plain}"
         fi
@@ -234,7 +234,7 @@ restart() {
     sleep 2
     check_status
     if [[ $? == 0 ]]; then
-        echo -e "${green}v2-ui 与 v2ray 重启成功${plain}"
+        echo -e "${green}v2-ui 与 xray 重启成功${plain}"
     else
         echo -e "${red}面板重启失败，可能是因为启动时间超过了两秒，请稍后查看日志信息${plain}"
     fi

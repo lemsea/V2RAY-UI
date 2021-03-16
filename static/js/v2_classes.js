@@ -695,6 +695,7 @@ class Inbound extends V2CommonClass {
         for (const [key, value] of params) {
             url.searchParams.set(key, value)
         }
+        url.hash = encodeURIComponent(this.remark);
         return url.toString();
     }
 

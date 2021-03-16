@@ -123,16 +123,16 @@
                 tip: '{{ _('Be careful modifying it! ! ! The resulting v2ray configuration is written to the file of this configuration and generally does not need to be modified.') }}',
             },#}
             v2_template_config: {
-                name: '{{ _('v2ray config template') }}',
-                tip: '{{ _('Be careful modifying it! ! ! Make sure you are very familiar with the configuration of v2ray, please do not delete the configuration about api.') }}',
+                name: '{{ _('xray config template') }}',
+                tip: '{{ _('Be careful modifying it! ! ! Make sure you are very familiar with the configuration of xray, please do not delete the configuration about api.') }}',
             },
             v2_config_check_interval: {
                 name: '{{ _('Change Effective Time') }} ({{ _('seconds') }})',
                 tip: '{{ _('Too small number can lead to increased CPU usage, fill 0 or negative at your own risk.') }}',
             },
             v2_restart_cmd: {
-                name: '{{ _('Command to restart v2ray') }}',
-                tip: '{{ _('When v2ray needs to be restarted, the panel will automatically run this command to restart v2ray, generally without modification.') }}',
+                name: '{{ _('Command to restart xray') }}',
+                tip: '{{ _('When xray needs to be restarted, the panel will automatically run this command to restart xray, generally without modification.') }}',
             },
             traffic_job_interval: {
                 name: '{{ _('Statistical traffic interval time') }} ({{ _('seconds') }})',
@@ -184,7 +184,7 @@
                             --i;
                         }
                     }
-                    settings.unshift({name: '{{ _('V2ray core version') }}', value: '{{ v2ray_version }}'});
+                    settings.unshift({name: '{{ _('xray core version') }}', value: '{{ v2ray_version }}'});
                     settings.unshift({name: '{{ _('current panel version') }}', value: '{{ cur_ver }}'});
                     this.settings = settings;
                 },
