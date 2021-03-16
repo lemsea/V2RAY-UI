@@ -489,7 +489,7 @@ class StreamSettings extends V2CommonClass {
     }
 
     get is_xtls() {
-        return this.security === "tls" && this._is_xtls;
+        return this.security === "tls" && this.network === "tcp" && this._is_xtls;
     }
 
     set is_xtls(is_xtls) {
@@ -660,7 +660,11 @@ class Inbound extends V2CommonClass {
         const type = this.stream.network;
         const params = new Map();
         params.set("type", this.stream.network);
-        params.set("security", this.stream.security);
+        if (this.stream.is_xtls) {
+            params.set("security", "xtls");
+        } else {
+            params.set("security", this.stream.security);
+        }
         switch (type) {
             case "tcp":
                 const tcp = this.stream.tcp;
@@ -706,6 +710,10 @@ class Inbound extends V2CommonClass {
                 address = this.stream.tls.server;
                 params.set("sni", address);
             }
+        }
+
+        if (this.stream.is_xtls) {
+            params.set("flow", this.settings.vlesses[0].flow);
         }
 
         for (const [key, value] of params) {

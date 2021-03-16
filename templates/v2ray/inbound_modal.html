@@ -404,7 +404,7 @@
                         @change="checked => inModal.inbound.stream.security = checked ? 'tls' : 'none'">
                 </a-switch>
             </a-form-item>
-            <a-form-item v-if="inModal.inbound.protocol === Protocols.VLESS && inModal.inbound.stream.security === 'tls'" label="xtls">
+            <a-form-item v-if="inModal.inbound.protocol === Protocols.VLESS && inModal.inbound.stream.security === 'tls' && inModal.inbound.stream.network === 'tcp'" label="xtls">
                 <a-switch v-model="inModal.inbound.stream.is_xtls"></a-switch>
             </a-form-item>
         </a-form>
