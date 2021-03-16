@@ -373,7 +373,7 @@ show_status() {
         2)
             echo -e "面板状态: ${red}未安装${plain}"
     esac
-    show_v2ray_status
+    show_xray_status
 }
 
 show_enable_status() {
@@ -385,8 +385,8 @@ show_enable_status() {
     fi
 }
 
-check_v2ray_status() {
-    count=$(ps -ef | grep "v2ray-v2-ui" | grep -v "grep" | wc -l)
+check_xray_status() {
+    count=$(ps -ef | grep "xray-v2-ui" | grep -v "grep" | wc -l)
     if [[ count -ne 0 ]]; then
         return 0
     else
@@ -394,12 +394,12 @@ check_v2ray_status() {
     fi
 }
 
-show_v2ray_status() {
-    check_v2ray_status
+show_xray_status() {
+    check_xray_status
     if [[ $? == 0 ]]; then
-        echo -e "v2ray 状态: ${green}运行${plain}"
+        echo -e "xray 状态: ${green}运行${plain}"
     else
-        echo -e "v2ray 状态: ${red}未运行${plain}"
+        echo -e "xray 状态: ${red}未运行${plain}"
     fi
 }
 
