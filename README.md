@@ -155,3 +155,7 @@ systemctl daemon-reload
 群组：https://t.me/sprov_blog
 
 频道：https://t.me/sprov_channel
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/sprov065/v2-ui.svg)](https://starchart.cc/sprov065/v2-ui)
