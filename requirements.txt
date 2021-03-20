@@ -9,7 +9,7 @@ Flask-Babel==0.12.2
 Flask-SQLAlchemy==2.4.1
 idna==2.10
 itsdangerous==1.1.0
-Jinja2==2.10.3
+Jinja2==2.11.3
 MarkupSafe==1.1.1
 psutil==5.7.2
 python-dateutil==2.8.1
