@@ -8,12 +8,10 @@ import platform
 import re
 import subprocess
 import sys
-import time
 from collections import deque
 from enum import Enum
-from queue import Queue
 from threading import Timer, Lock
-from typing import Optional, List
+from typing import Optional
 
 import psutil
 
@@ -23,8 +21,8 @@ from v2ray.models import Inbound
 V2_CONF_KEYS = ['log', 'api', 'dns', 'routing', 'policy', 'inbounds', 'outbounds', 'transport',
                 'stats', 'reverse']
 __is_windows: bool = platform.system() == 'Windows'
-__v2ray_file_name: str = 'v2ray-win.exe' if __is_windows else 'v2ray-v2-ui'
-__v2ctl_file_name: str = 'v2ctl.exe' if __is_windows else 'v2ctl'
+__v2ray_file_name: str = 'xray.exe' if __is_windows else 'xray-v2-ui'
+__v2ctl_file_name: str = 'xray.exe' if __is_windows else 'xray-v2-ui'
 __v2ray_cmd: str = os.path.join(config.BASE_DIR, 'bin', __v2ray_file_name)
 __v2ctl_cmd: str = os.path.join(config.BASE_DIR, 'bin', __v2ctl_file_name)
 __v2ray_conf_path: str = os.path.join(config.BASE_DIR, 'bin', 'config.json')
@@ -47,7 +45,7 @@ def start_v2ray():
     encoding = 'gbk' if __is_windows else 'utf-8'
     __v2ray_process = subprocess.Popen([__v2ray_cmd, '-config', __v2ray_conf_path], shell=False,
                                        stderr=subprocess.STDOUT, stdout=subprocess.PIPE, encoding=encoding)
-    logging.info('start v2ray')
+    logging.info('start xray')
 
     def f():
         global __v2ray_error_msg
@@ -74,14 +72,14 @@ def stop_v2ray():
     global __v2ray_process
     if __is_windows:
         for p in psutil.process_iter():
-            if 'v2ray-win' in p.name():
+            if 'xray.exe' in p.name():
                 p.terminate()
     if __v2ray_process is not None:
         try:
             __v2ray_process.terminate()
-            logging.info('stop v2ray')
+            logging.info('stop xray')
         except Exception as e:
-            logging.warning(f'stop v2ray error: {e}')
+            logging.warning(f'stop xray error: {e}')
         finally:
             __v2ray_process = None
 
@@ -128,7 +126,7 @@ def read_v2_config() -> Optional[dict]:
         #             break
         # return v2_config
     except Exception as e:
-        logging.error('An error occurred while reading the v2ray configuration file: ' + str(e))
+        logging.error('An error occurred while reading the xray configuration file: ' + str(e))
         return None
 
 
@@ -154,7 +152,7 @@ def write_v2_config(v2_config: dict):
         #             break
         restart(True)
     except Exception as e:
-        logging.error('An error occurred while writing the v2ray configuration file: ' + str(e))
+        logging.error('An error occurred while writing the xray configuration file: ' + str(e))
 
 
 def __get_api_address_port():
@@ -184,7 +182,7 @@ def get_v2ray_version():
             __v2ray_version = result.split(' ')[1]
             return __v2ray_version
         except Exception as e:
-            logging.warning(f'get v2ray version failed: {e}')
+            logging.warning(f'get xray version failed: {e}')
             return 'Error'
 
 
@@ -201,7 +199,7 @@ def restart(now=False):
         try:
             restart_v2ray()
         except Exception as e:
-            logging.warning(f'restart v2ray error: {e}')
+            logging.warning(f'restart xray error: {e}')
 
     if now:
         f()
@@ -214,49 +212,75 @@ try:
     if not __api_address or __api_address == '0.0.0.0':
         __api_address = '127.0.0.1'
 except Exception as e:
-    logging.error('Failed to open v2ray api, please reset all panel settings.')
+    logging.error('Failed to open xray api, please reset all panel settings.')
     logging.error(str(e))
     sys.exit(-1)
 __traffic_pattern = re.compile('stat:\s*<\s*name:\s*"inbound>>>'
                                '(?P<tag>[^>]+)>>>traffic>>>(?P<type>uplink|downlink)"(\s*value:\s*(?P<value>\d+))?')
 
 
-def __get_v2ray_api_cmd(address, service, method, pattern, reset):
-    cmd = '%s api --server=%s:%d %s.%s \'pattern: "%s" reset: %s\'' \
-          % (__v2ctl_cmd, address, __api_port, service, method, pattern, reset)
+def __get_v2ray_api_cmd(address, pattern, reset):
+    cmd = '%s api statsquery --server=%s:%d -pattern "%s" %s' \
+          % (__v2ctl_cmd, address, __api_port, pattern, reset)
     return cmd
 
 
 def get_inbounds_traffic(reset=True):
     if __api_port < 0:
-        logging.warning('v2ray api port is not configured')
+        logging.warning('xray api port is not configured')
         return None
-    cmd = __get_v2ray_api_cmd('127.0.0.1', 'StatsService', 'QueryStats', '', 'true' if reset else 'false')
+    cmd = __get_v2ray_api_cmd('127.0.0.1', '', '-reset' if reset else 'false')
     result, code = cmd_util.exec_cmd(cmd)
     if code != 0:
-        logging.warning('v2ray api code %d' % code)
+        logging.warning('xray api code %d' % code)
         return None
     inbounds = []
-    for match in __traffic_pattern.finditer(result):
-        tag = match.group('tag')
-        tag = codecs.getdecoder('unicode_escape')(tag)[0]
-        tag = tag.encode('ISO8859-1').decode('utf-8')
-        if tag == 'api':
-            continue
-        _type = match.group('type')
-        value = match.group('value')
-        if not value:
+    try:
+        name_pattern = re.compile("inbound>>>(?P<tag>[^>]+)>>>traffic>>>(?P<type>uplink|downlink)")
+        stat = json.loads(result)
+        stats = stat["stat"]
+        for s in stats:
+            name = s["name"]
             value = 0
-        else:
-            value = int(value)
-        inbound = list_util.get(inbounds, 'tag', tag)
-        if inbound:
-            inbound[_type] = value
-        else:
-            inbounds.append({
-                'tag': tag,
-                _type: value
-            })
+            if "value" in s:
+                value = s["value"]
+            match = name_pattern.fullmatch(name)
+            tag = match.group("tag")
+            tag = codecs.getdecoder('unicode_escape')(tag)[0]
+            tag = tag.encode('ISO8859-1').decode('utf-8')
+            if tag == 'api':
+                continue
+            _type = match.group('type')
+            inbound = list_util.get(inbounds, 'tag', tag)
+            if inbound:
+                inbound[_type] = value
+            else:
+                inbounds.append({
+                    'tag': tag,
+                    _type: value
+                })
+    except Exception as e:
+        logging.error(e)
+    # for match in __traffic_pattern.finditer(result):
+    #     tag = match.group('tag')
+    #     tag = codecs.getdecoder('unicode_escape')(tag)[0]
+    #     tag = tag.encode('ISO8859-1').decode('utf-8')
+    #     if tag == 'api':
+    #         continue
+    #     _type = match.group('type')
+    #     value = match.group('value')
+    #     if not value:
+    #         value = 0
+    #     else:
+    #         value = int(value)
+    #     inbound = list_util.get(inbounds, 'tag', tag)
+    #     if inbound:
+    #         inbound[_type] = value
+    #     else:
+    #         inbounds.append({
+    #             'tag': tag,
+    #             _type: value
+    #         })
     return inbounds
 
 

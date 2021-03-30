@@ -371,7 +371,7 @@
                         protocol: inbound.protocol,
                         settings: inbound.settings.toString(false),
                         stream_settings: inbound.stream.toString(false),
-                        sniffing: [Protocols.VMESS, Protocols.SHADOWSOCKS].indexOf(inbound.protocol) >= 0 ?
+                        sniffing: [Protocols.VMESS, Protocols.VLESS, Protocols.SHADOWSOCKS].indexOf(inbound.protocol) >= 0 ?
                             inbound.sniffing.toString(false) : '{}',
                         remark: inbound.remark,
                     };
@@ -384,7 +384,7 @@
                         protocol: inbound.protocol,
                         settings: inbound.settings.toString(false),
                         stream_settings: inbound.stream.toString(false),
-                        sniffing: [Protocols.VMESS, Protocols.SHADOWSOCKS].indexOf(inbound.protocol) >= 0 ?
+                        sniffing: [Protocols.VMESS, Protocols.VLESS, Protocols.SHADOWSOCKS].indexOf(inbound.protocol) >= 0 ?
                             inbound.sniffing.toString(false) : '{}',
                         remark: inbound.remark,
                         enable: inbound.enable,

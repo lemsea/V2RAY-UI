@@ -62,7 +62,7 @@
                 <a-row>
                     <a-col :sm="24" :md="12">
                         <a-card hoverable>
-                            v2ray {{ _('status') }}: <a-tag :color="status.v2.color">[[ status.v2.stat ]]</a-tag>
+                            xray {{ _('status') }}: <a-tag :color="status.v2.color">[[ status.v2.stat ]]</a-tag>
                             <a-tooltip v-if="status.v2.stat === '{{ _('error') }}'">
                                 <template slot="title">
                                     <p v-for="line in status.v2.error_msg.split('\n')">[[ line ]]</p>
@@ -97,7 +97,7 @@
                             tcp / udp {{ _('connections') }}: [[ status.tcp_count ]] / [[ status.udp_count ]]
                             <a-tooltip>
                                 <template slot="title">
-                                    {{ _('The number of connections for the entire system, not v2ray.') }}
+                                    {{ _('The number of connections for the entire system, not xray.') }}
                                 </template>
                                 <a-icon type="question-circle" theme="filled"></a-icon>
                             </a-tooltip>
@@ -155,10 +155,10 @@
                 </transition>
             </a-layout-content>
         </a-layout>
-        <a-modal id="version-modal" v-model="versionModal.visible" title="{{ _('Switch v2ray version') }}"
+        <a-modal id="version-modal" v-model="versionModal.visible" title="{{ _('Switch xray version') }}"
                  :closable="true" @ok="() => versionModal.visible = false"
                  ok-text="{{ _('confirm') }}" cancel-text="{{ _('close') }}">
-            <h2>{{ _('Click on the v2ray-core version you want to switch.') }}</h2>
+            <h2>{{ _('Click on the xray-core version you want to switch.') }}</h2>
             <h2>{{ _('Please choose carefully, the old version may be incompatible with the configuration.') }}</h2>
             <template v-for="version, index in versionModal.versions">
                 <a-tag :color="index % 2 == 0 ? 'blue' : 'green'"
@@ -274,8 +274,8 @@
                 },
                 switchV2rayVersion(version) {
                     this.$confirm({
-                        title: '{{ _('Switch v2ray version') }}',
-                        content: '{{ _('Are you sure you want to switch to v2ray') }}' + ` ${version}?`,
+                        title: '{{ _('Switch xray version') }}',
+                        content: '{{ _('Are you sure you want to switch to xray') }}' + ` ${version}?`,
                         okText: '{{ _('confirm') }}',
                         cancelText: '{{ _('cancel') }}',
                         onOk: () => {

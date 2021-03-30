@@ -47,11 +47,54 @@
         </a-form-item>
     </a-form>
 
-    <!-- vmess settings -->
+    <!-- vless settings -->
     <a-form v-if="inModal.inbound.protocol === Protocols.VLESS"
             layout="inline">
         <a-form-item label="id">
             <a-input v-model.trim="inModal.inbound.settings.vlesses[0].id"></a-input>
+        </a-form-item>
+        <a-form-item label="flow">
+            <a-select v-model="inModal.inbound.settings.vlesses[0].flow" style="width: 150px">
+                <a-select-option value="">无</a-select-option>
+                <a-select-option v-for="key in VLESS_FLOW" :value="key">[[ key ]]</a-select-option>
+            </a-select>
+        </a-form-item>
+    </a-form>
+
+    <a-form v-if="inModal.inbound.protocol === Protocols.VLESS"
+            layout="inline">
+        <a-form-item label="fallbacks">
+            <a-row>
+                <a-button type="primary" size="small"
+                          @click="inModal.inbound.settings.addFallback()">
+                    +
+                </a-button>
+            </a-row>
+        </a-form-item>
+    </a-form>
+
+    <!-- vless fallbacks -->
+    <a-form v-for="(fallback, index) in inModal.inbound.settings.fallbacks" layout="inline">
+        <a-form-item>
+            <a-divider>
+                fallback[[ index + 1 ]]
+                <a-icon type="delete" @click="() => inModal.inbound.settings.delFallback(index)" style="color: rgb(255, 77, 79);cursor: pointer;"/>
+            </a-divider>
+        </a-form-item>
+        <a-form-item label="name">
+            <a-input v-model="fallback.name"></a-input>
+        </a-form-item>
+        <a-form-item label="alpn">
+            <a-input v-model="fallback.alpn"></a-input>
+        </a-form-item>
+        <a-form-item label="path">
+            <a-input v-model="fallback.path"></a-input>
+        </a-form-item>
+        <a-form-item label="dest">
+            <a-input v-model="fallback.dest"></a-input>
+        </a-form-item>
+        <a-form-item label="xver">
+            <a-input v-model="fallback.xver"></a-input>
         </a-form-item>
     </a-form>
 
@@ -360,6 +403,9 @@
                         :checked="inModal.inbound.stream.security === 'tls'"
                         @change="checked => inModal.inbound.stream.security = checked ? 'tls' : 'none'">
                 </a-switch>
+            </a-form-item>
+            <a-form-item v-if="inModal.inbound.protocol === Protocols.VLESS && inModal.inbound.stream.security === 'tls' && inModal.inbound.stream.network === 'tcp'" label="xtls">
+                <a-switch v-model="inModal.inbound.stream.is_xtls"></a-switch>
             </a-form-item>
         </a-form>
 
