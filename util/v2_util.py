@@ -15,16 +15,18 @@ from typing import Optional
 
 import psutil
 
-from util import config, list_util, cmd_util, file_util, json_util
+from util import config, list_util, cmd_util, file_util, json_util, sys_util
 from v2ray.models import Inbound
+
+
+def get_xray_file_name():
+    return f'xray-v2-ui-{sys_util.sys_name()}-{sys_util.arch()}'
+
 
 V2_CONF_KEYS = ['log', 'api', 'dns', 'routing', 'policy', 'inbounds', 'outbounds', 'transport',
                 'stats', 'reverse']
-__is_windows: bool = platform.system() == 'Windows'
-__v2ray_file_name: str = 'xray.exe' if __is_windows else 'xray-v2-ui'
-__v2ctl_file_name: str = 'xray.exe' if __is_windows else 'xray-v2-ui'
-__v2ray_cmd: str = os.path.join(config.BASE_DIR, 'bin', __v2ray_file_name)
-__v2ctl_cmd: str = os.path.join(config.BASE_DIR, 'bin', __v2ctl_file_name)
+__is_windows: bool = sys_util.is_windows()
+__v2ray_cmd: str = os.path.join(config.BASE_DIR, 'bin', get_xray_file_name())
 __v2ray_conf_path: str = os.path.join(config.BASE_DIR, 'bin', 'config.json')
 __v2ray_process: Optional[subprocess.Popen] = None
 __v2ray_error_msg: str = ''
@@ -156,7 +158,7 @@ def write_v2_config(v2_config: dict):
 
 
 def __get_api_address_port():
-    template_config = json.loads(config.get_v2_template_config(), encoding='utf-8')
+    template_config = json.loads(config.get_v2_template_config())
     inbounds = template_config['inbounds']
     api_inbound = list_util.get(inbounds, 'tag', 'api')
     return api_inbound['listen'], api_inbound['port']
@@ -212,7 +214,7 @@ try:
     if not __api_address or __api_address == '0.0.0.0':
         __api_address = '127.0.0.1'
 except Exception as e:
-    logging.error('Failed to open xray api, please reset all panel settings.')
+    logging.error('Fail to open xray api, please reset all panel settings.')
     logging.error(str(e))
     sys.exit(-1)
 __traffic_pattern = re.compile('stat:\s*<\s*name:\s*"inbound>>>'
@@ -221,7 +223,7 @@ __traffic_pattern = re.compile('stat:\s*<\s*name:\s*"inbound>>>'
 
 def __get_v2ray_api_cmd(address, pattern, reset):
     cmd = '%s api statsquery --server=%s:%d -pattern "%s" %s' \
-          % (__v2ctl_cmd, address, __api_port, pattern, reset)
+          % (__v2ray_cmd, address, __api_port, pattern, reset)
     return cmd
 
 

@@ -956,12 +956,16 @@ Inbound.VLESSSettings.Fallback = class extends V2CommonClass {
     }
 
     toJson() {
+        let xver = this.xver;
+        if (!Number.isInteger(xver)) {
+            xver = 0;
+        }
         return {
             name: this.name,
             alpn: this.alpn,
             path: this.path,
             dest: this.dest,
-            xver: this.xver,
+            xver: xver,
         }
     }
 

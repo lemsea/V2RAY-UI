@@ -1,6 +1,5 @@
 import logging
 import os
-import platform
 import stat
 import time
 import traceback
@@ -13,7 +12,7 @@ from flask_babel import gettext
 
 from base.models import Msg, User
 from init import db
-from util import server_info, config, v2_jobs, file_util, v2_util
+from util import server_info, config, v2_jobs, file_util, v2_util, sys_util
 
 server_bp = Blueprint('server', __name__, url_prefix='/server')
 
@@ -90,11 +89,21 @@ def get_v2ray_versions():
 
 @server_bp.route('/install_v2ray/<version>', methods=['POST'])
 def install_v2ray_by_version(version: str):
-    url = f'https://github.com/XTLS/Xray-core/releases/download/{version}/Xray-linux-64.zip'
+    sys_name = sys_util.sys_name()
+    if sys_name == "darwin":
+        sys_name = "macos"
+    arch = sys_util.arch()
+    if arch == "amd64":
+        arch = "64"
+    elif arch == "arm64":
+        arch = "arm64-v8a"
+    url = f'https://github.com/XTLS/Xray-core/releases/download/{version}/Xray-{sys_name}-{arch}.zip'
     filename = config.get_dir('v2ray_temp.zip')
     zip_dest_dir = config.get_dir('temp_v2ray')
     try:
         with requests.get(url, stream=True) as response:
+            if response.status_code != 200:
+                raise Exception(f'download xray url:{url} failed: {response.text}')
             with open(filename, 'wb') as f:
                 for data in response.iter_content(8192):
                     f.write(data)
@@ -104,7 +113,7 @@ def install_v2ray_by_version(version: str):
         bin_dir = config.get_dir('bin')
 
         origin_names = ['xray', 'geoip.dat', 'geosite.dat']
-        filenames = ['xray-v2-ui', 'geoip.dat', 'geosite.dat']
+        filenames = [v2_util.get_xray_file_name(), 'geoip.dat', 'geosite.dat']
 
         for i in range(len(filenames)):
             origin_name = origin_names[i]
