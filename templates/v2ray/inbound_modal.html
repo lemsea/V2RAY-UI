@@ -140,11 +140,12 @@
                     <a-select-option value="ws">ws</a-select-option>
                     <a-select-option value="http">http</a-select-option>
                     <a-select-option value="quic">quic</a-select-option>
+                    <a-select-option value="grpc">grpc</a-select-option>
                 </a-select>
             </a-form-item>
         </a-form>
 
-        <!-- vmess tcp -->
+        <!-- tcp -->
         <template v-if="inModal.inbound.stream.network === 'tcp'">
             <!-- vmess tcp type -->
             <a-form layout="inline">
@@ -229,7 +230,7 @@
             </a-form>
         </template>
 
-        <!-- vmess kcp -->
+        <!-- kcp -->
         <a-form v-if="inModal.inbound.stream.network === 'kcp'"
                 layout="inline">
             <a-form-item label="{{ _('camouflage') }}">
@@ -268,7 +269,7 @@
             </a-form-item>
         </a-form>
 
-        <!-- vmess ws -->
+        <!-- ws -->
         <a-form v-if="inModal.inbound.stream.network === 'ws'"
                 layout="inline">
             <a-form-item label="{{ _('path') }}">
@@ -297,7 +298,7 @@
             </a-form-item>
         </a-form>
 
-        <!-- vmess http -->
+        <!-- http -->
         <a-form v-if="inModal.inbound.stream.network === 'http'"
                 layout="inline">
             <a-form-item label="{{ _('path') }}">
@@ -310,7 +311,7 @@
             </a-form-item>
         </a-form>
 
-        <!-- vmess quic -->
+        <!-- quic -->
         <a-form v-if="inModal.inbound.stream.network === 'quic'"
                 layout="inline">
             <a-form-item label="{{ _('method') }}">
@@ -332,6 +333,14 @@
                     <a-select-option value="dtls">dtls（{{ _('camouflage DTLS 1.2 packages') }}）</a-select-option>
                     <a-select-option value="wireguard">wireguard（{{ _('camouflage wireguard packages') }}）</a-select-option>
                 </a-select>
+            </a-form-item>
+        </a-form>
+
+        <!-- grpc -->
+        <a-form v-if="inModal.inbound.stream.network === 'grpc'"
+                layout="inline">
+            <a-form-item label="serviceName">
+                <a-input v-model.trim="inModal.inbound.stream.grpc.serviceName"></a-input>
             </a-form-item>
         </a-form>
     </template>
@@ -394,7 +403,7 @@
                     || inModal.inbound.protocol === Protocols.VLESS
                     || inModal.inbound.protocol === Protocols.TROJAN
                     || inModal.inbound.protocol === Protocols.SHADOWSOCKS)
-                    && ['tcp', 'ws', 'http', 'quic'].indexOf(inModal.inbound.stream.network) >= 0">
+                    && ['tcp', 'ws', 'http', 'quic', 'grpc'].indexOf(inModal.inbound.stream.network) >= 0">
 
         <!-- tls enable -->
         <a-form layout="inline" v-if="inModal.inbound.protocol !== Protocols.TROJAN">

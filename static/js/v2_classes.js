@@ -385,6 +385,23 @@ class QuicStreamSettings extends V2CommonClass {
     }
 }
 
+class GrpcStreamSettings extends V2CommonClass {
+    constructor(serviceName="") {
+        super();
+        this.serviceName = serviceName;
+    }
+
+    static fromJson(json={}) {
+        return new GrpcStreamSettings(json.serviceName);
+    }
+
+    toJson() {
+        return {
+            serviceName: this.serviceName,
+        }
+    }
+}
+
 class TlsStreamSettings extends V2CommonClass {
     constructor(serverName='',
                 certificates=[new TlsStreamSettings.Cert()]) {
@@ -470,6 +487,7 @@ class StreamSettings extends V2CommonClass {
                 wsSettings=new WsStreamSettings(),
                 httpSettings=new HttpStreamSettings(),
                 quicSettings=new QuicStreamSettings(),
+                grpcSettings=new GrpcStreamSettings(),
                 ) {
         super();
         this.network = network;
@@ -486,6 +504,7 @@ class StreamSettings extends V2CommonClass {
         this.ws = wsSettings;
         this.http = httpSettings;
         this.quic = quicSettings;
+        this.grpc = grpcSettings;
     }
 
     get is_xtls() {
@@ -512,6 +531,7 @@ class StreamSettings extends V2CommonClass {
             WsStreamSettings.fromJson(json.wsSettings),
             HttpStreamSettings.fromJson(json.httpSettings),
             QuicStreamSettings.fromJson(json.quicSettings),
+            GrpcStreamSettings.fromJson(json.grpcSettings),
         );
     }
 
@@ -531,6 +551,7 @@ class StreamSettings extends V2CommonClass {
             wsSettings: network === 'ws' ? this.ws.toJson() : undefined,
             httpSettings: network === 'http' ? this.http.toJson() : undefined,
             quicSettings: network === 'quic' ? this.quic.toJson() : undefined,
+            grpcSettings: network === 'grpc' ? this.grpc.toJson() : undefined,
         };
     }
 }
@@ -629,6 +650,8 @@ class Inbound extends V2CommonClass {
             type = this.stream.quic.type;
             host = this.stream.quic.security;
             path = this.stream.quic.key;
+        } else if (network === 'grpc') {
+            path = this.stream.grpc.serviceName;
         }
 
         if (this.stream.security === 'tls') {
@@ -702,6 +725,10 @@ class Inbound extends V2CommonClass {
                 params.set("quicSecurity", quic.security);
                 params.set("key", quic.key);
                 params.set("headerType", quic.type);
+                break;
+            case "grpc":
+                const grpc = this.stream.grpc;
+                params.set("serviceName", grpc.serviceName);
                 break;
         }
 
