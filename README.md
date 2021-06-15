@@ -1,3 +1,5 @@
+# 新的面板 [x-ui](https://github.com/sprov065/x-ui) 正在开发中，支持 v2-ui 的所有功能，解决了 v2-ui 存在的一些问题，并增加了总流量限制功能，欢迎测试使用。待 x-ui 稳定后，v2-ui 将不再提供更新
+
 中文 | [English](README.en.md)
 
 # v2-ui
